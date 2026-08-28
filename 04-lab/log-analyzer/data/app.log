@@ -1,0 +1,12 @@
+2026-08-28 08:00:01 INFO Application started
+2026-08-28 08:02:14 INFO User admin logged in
+2026-08-28 08:05:33 WARNING API response time exceeded 1500ms
+2026-08-28 08:07:02 ERROR Database connection timeout after 30 seconds
+2026-08-28 08:07:05 INFO Retrying database connection
+2026-08-28 08:07:08 INFO Database connection restored
+2026-08-28 09:15:41 WARNING Disk usage reached 80 percent
+2026-08-28 09:20:16 ERROR Failed to process order ORD-1042
+2026-08-28 09:20:17 ERROR Validation failed: customer_email is missing
+2026-08-28 10:30:00 INFO Scheduled report completed
+2026-08-28 11:45:22 CRITICAL Payment service unavailable
+2026-08-28 11:46:03 INFO Circuit breaker opened for payment service

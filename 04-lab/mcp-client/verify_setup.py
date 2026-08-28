@@ -8,26 +8,24 @@ import sys
 from pathlib import Path
 
 def check_environment():
-    """Check if .env file exists and is configured"""
+    """Check GOOGLE_API_KEY from the process environment or a local .env file."""
     print("🔍 Checking environment configuration...")
-    
+
     env_file = Path(".env")
-    if not env_file.exists():
-        print("❌ .env file not found")
-        print("   Run: echo 'GOOGLE_API_KEY=your_key' > .env")
-        return False
-    
-    # Check if GOOGLE_API_KEY is set
-    from dotenv import load_dotenv
-    load_dotenv()
-    
+    if env_file.exists():
+        from dotenv import load_dotenv
+
+        load_dotenv()
+
     api_key = os.getenv("GOOGLE_API_KEY")
     if not api_key or api_key == "your_google_api_key_here":
-        print("❌ GOOGLE_API_KEY not configured in .env")
+        print("❌ GOOGLE_API_KEY is not configured")
+        print('   PowerShell: $env:GOOGLE_API_KEY = "your_key"')
+        print("   Or create an ignored local .env file")
         print("   Get key from: https://aistudio.google.com/apikey")
         return False
     
-    print(f"✅ GOOGLE_API_KEY configured ({api_key[:10]}...)")
+    print("✅ GOOGLE_API_KEY configured")
     return True
 
 def check_dependencies():
@@ -82,7 +80,7 @@ def check_mcp_server():
     """Check if MCP server is accessible"""
     print("\n🔍 Checking MCP server connectivity...")
     
-    server_url = "https://weather-mcp-server-oze7nwnjba-as.a.run.app"
+    server_url = os.getenv("MCP_SERVER_URL", "http://localhost:8085/mcp")
     
     try:
         import httpx
@@ -95,7 +93,7 @@ def check_mcp_server():
         
         status_code = asyncio.run(test_connection())
         
-        if status_code in [200, 404]:  # 404 is expected for GET on MCP endpoint
+        if status_code in [200, 404, 405, 406]:
             print(f"✅ MCP server reachable at {server_url}")
             return True
         else:
@@ -142,8 +140,7 @@ def main():
     if all(checks):
         print("✅ All checks passed!")
         print("\n🚀 Ready to start!")
-        print("   Run: ./start_agent.sh")
-        print("   Or:  uv run adk web")
+        print("   Run: python -m uv run adk web")
         print("\n📍 Then open: http://localhost:8000")
         return 0
     else:

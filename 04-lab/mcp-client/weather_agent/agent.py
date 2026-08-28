@@ -5,6 +5,12 @@ Successfully connects to custom MCP HTTP endpoints!
 from google.adk import Agent
 from google.adk.tools.mcp_tool.mcp_toolset import McpToolset, StreamableHTTPConnectionParams
 import logging
+import sys
+
+# Force UTF-8 on Windows terminals so ADK can log Vietnamese prompts/results.
+for stream in (sys.stdout, sys.stderr):
+    if hasattr(stream, "reconfigure"):
+        stream.reconfigure(encoding="utf-8")
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -32,12 +38,13 @@ try:
     # Create the agent with remote MCP tools
     root_agent = Agent(
         name="weather_agent",
-        model="gemini-2.5-flash",
+        model="gemini-3.6-flash",
         tools=[weather_tools],
     )
     logger.info("✅ Weather agent initialized with remote MCP tools:")
     logger.info("   - get_current_weather(city)")
     logger.info("   - get_forecast(city, days)")
+    logger.info("   - get_air_quality(city)")
     logger.info("   - health_check()")
     logger.info("🎉 Remote MCP connection successful!")
     
@@ -51,6 +58,6 @@ except Exception as e:
     logger.warning("⚠️  Creating fallback agent without MCP tools")
     root_agent = Agent(
         name="weather_agent",
-        model="gemini-2.5-flash",
+        model="gemini-3.6-flash",
     )
 

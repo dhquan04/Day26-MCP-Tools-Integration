@@ -1,6 +1,6 @@
 # 02 — MCP Basics (Server + Client)
 
-Cùng tool `get_weather`, nhưng giờ tách ra **MCP server độc lập**. Server tự công bố
+Cùng các tool `get_weather`, `get_air_quality`, nhưng giờ tách ra **MCP server độc lập**. Server tự công bố
 tool qua giao thức MCP; bất kỳ client nào (Claude Code, Cursor, hoặc `weather_client.py`)
 cũng cắm vào dùng được — không cần biết code bên trong.
 
@@ -41,6 +41,11 @@ call_tool get_weather(city='Haiphong'):
 |---|---|
 | `weather_server.py` | MCP server — `@mcp.tool()` tự sinh schema từ type hints + docstring |
 | `weather_client.py` | MCP client — `list_tools` + `call_tool` qua stdio transport |
+
+Server hiện công bố hai tools:
+
+- `get_weather(city)`: lấy thời tiết mock hiện tại.
+- `get_air_quality(city)`: lấy AQI và PM2.5 mock để minh họa thêm tool mới.
 
 ---
 

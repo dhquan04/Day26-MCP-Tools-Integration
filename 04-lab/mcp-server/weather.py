@@ -1,8 +1,13 @@
 from typing import Any
-import asyncio
 import httpx
 import os
+import sys
 from mcp.server.fastmcp import FastMCP
+
+# Force UTF-8 on Windows terminals so Vietnamese prompts and tool output work.
+for stream in (sys.stdout, sys.stderr):
+    if hasattr(stream, "reconfigure"):
+        stream.reconfigure(encoding="utf-8")
 
 # Initialize FastMCP server
 port = int(os.getenv("PORT", 8085))
@@ -14,6 +19,15 @@ USER_AGENT = "weather-app/1.0"
 
 # Get API key from environment variable
 API_KEY = os.getenv("WEATHERAPI_KEY")
+
+EPA_AIR_QUALITY_LEVELS = {
+    1: "Good",
+    2: "Moderate",
+    3: "Unhealthy for sensitive groups",
+    4: "Unhealthy",
+    5: "Very unhealthy",
+    6: "Hazardous",
+}
 
 async def make_weather_request(endpoint: str, params: dict[str, str]) -> dict[str, Any] | None:
     """Make a request to the WeatherAPI with proper error handling."""
@@ -44,6 +58,37 @@ async def make_weather_request(endpoint: str, params: dict[str, str]) -> dict[st
         except Exception as e:
             print(f"Unexpected error: {e}")
             return None
+
+
+async def fetch_air_quality(city: str) -> dict[str, Any] | None:
+    """Fetch current air-quality data for one city from WeatherAPI."""
+    data = await make_weather_request(
+        "current.json",
+        {"q": city, "aqi": "yes"},
+    )
+    if not data:
+        return None
+
+    air_quality = data.get("current", {}).get("air_quality")
+    if not air_quality:
+        return None
+
+    location = data["location"]
+    epa_index = int(air_quality.get("us-epa-index", 0))
+    return {
+        "city": location["name"],
+        "region": location.get("region", ""),
+        "country": location["country"],
+        "epa_index": epa_index,
+        "level": EPA_AIR_QUALITY_LEVELS.get(epa_index, "Unknown"),
+        "co": air_quality.get("co"),
+        "no2": air_quality.get("no2"),
+        "o3": air_quality.get("o3"),
+        "so2": air_quality.get("so2"),
+        "pm2_5": air_quality.get("pm2_5"),
+        "pm10": air_quality.get("pm10"),
+        "last_updated": data["current"].get("last_updated", ""),
+    }
 
 @mcp.tool()
 async def get_current_weather(city: str) -> str:
@@ -130,13 +175,46 @@ UV Index: {day_data['uv']}
 
     return "\n---\n".join(forecasts)
 
+
+@mcp.tool()
+async def get_air_quality(city: str) -> str:
+    """Get current air quality and pollutant concentrations for a city.
+
+    Args:
+        city: City name (e.g., "Hanoi", "Danang", "Tokyo", "Sydney")
+    """
+    data = await fetch_air_quality(city)
+    if not data:
+        if not API_KEY:
+            return "❌ WeatherAPI key not configured. Please set WEATHERAPI_KEY."
+        return f"Unable to fetch air-quality data for {city}."
+
+    return f"""
+Current Air Quality for {data['city']}, {data['region']}, {data['country']}:
+
+US EPA Index: {data['epa_index']} / 6
+Level: {data['level']}
+PM2.5: {data['pm2_5']} µg/m³
+PM10: {data['pm10']} µg/m³
+Carbon Monoxide (CO): {data['co']} µg/m³
+Nitrogen Dioxide (NO₂): {data['no2']} µg/m³
+Ozone (O₃): {data['o3']} µg/m³
+Sulphur Dioxide (SO₂): {data['so2']} µg/m³
+
+Last updated: {data['last_updated']}
+"""
+
+
 @mcp.tool()
 async def health_check() -> str:
     """Health check endpoint for deployment verification."""
     return "✅ Weather MCP Server is running! Ready to provide weather data for Australian cities and worldwide."
 
 print("✅ MCP server initialized with Streamable HTTP transport")
-print("🔧 Available tools: get_current_weather, get_forecast, health_check")
+print(
+    "🔧 Available tools: get_current_weather, get_forecast, get_air_quality, "
+    "health_check"
+)
 
 if __name__ == "__main__":
     import sys

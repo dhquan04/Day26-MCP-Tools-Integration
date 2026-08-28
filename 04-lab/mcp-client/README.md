@@ -1,4 +1,4 @@
-# Weather Agent - Google ADK with MCP Server
+# Weather Agent - Google ADK with Local MCP Server
 
 AI agent built with **Google Agent Development Kit (ADK)** that uses tools from a local **MCP server** via Streamable HTTP transport.
 
@@ -27,43 +27,44 @@ AI agent built with **Google Agent Development Kit (ADK)** that uses tools from 
 ## Features
 
 - **Remote MCP Tools**: Connects to MCP server via Streamable HTTP
-- **3 Weather Tools**:
+- **4 Weather and Air-Quality Tools**:
   - `get_current_weather(city)` - Real-time weather conditions
   - `get_forecast(city, days)` - Weather forecast up to 3 days
+  - `get_air_quality(city)` - Current EPA category and pollutant concentrations
   - `health_check()` - Server health verification
 - **Web Interface**: UI via ADK web
 - **Streaming Responses**: Real-time AI responses
 
 ## Quick Start
 
-### 1. Start the MCP Server
+### 1. Start the MCP Server (PowerShell)
 
-```bash
+```powershell
 cd ../mcp-server
-export WEATHERAPI_KEY="your_weatherapi_key"
-uv run python weather.py
+$env:WEATHERAPI_KEY = "your_weatherapi_key"
+python -m uv run python weather.py
 ```
 
 ### 2. Setup Environment
 
-```bash
+```powershell
 cd mcp-client
 
-# Create .env file with your Google API key
+# Set your Google API key in this terminal
 # Get free key from: https://aistudio.google.com/apikey
-echo "GOOGLE_API_KEY=your_google_api_key_here" > .env
+$env:GOOGLE_API_KEY = "your_google_api_key_here"
 ```
 
 ### 3. Install Dependencies
 
-```bash
-uv sync
+```powershell
+python -m uv sync
 ```
 
 ### 4. Run the Agent
 
-```bash
-uv run adk web
+```powershell
+python -m uv run adk web
 ```
 
 ### 5. Use the Agent
@@ -103,7 +104,7 @@ connection_params = StreamableHTTPConnectionParams(
 
 root_agent = Agent(
     name="weather_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.6-flash",
     tools=[weather_tools],
 )
 ```
@@ -130,10 +131,8 @@ Fix the connection and restart ADK web.
 
 ## Environment Variables
 
-Create `.env` file:
-```bash
-GOOGLE_API_KEY=your_gemini_api_key
-```
+Đặt `GOOGLE_API_KEY` trong terminal chạy ADK. Có thể dùng `.env` local nếu muốn,
+nhưng file này đã được `.gitignore` loại khỏi repository.
 
 ## Resources
 

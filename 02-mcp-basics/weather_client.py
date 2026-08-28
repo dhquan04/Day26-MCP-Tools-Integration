@@ -20,6 +20,10 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
+
 async def main() -> None:
     # Dùng đúng interpreter đang chạy client (tránh lỗi "python" không tồn tại)
     params = StdioServerParameters(command=sys.executable, args=["weather_server.py"])
@@ -38,6 +42,12 @@ async def main() -> None:
             for city in ["Hanoi", "Danang", "Haiphong"]:
                 result = await session.call_tool("get_weather", {"city": city})
                 print(f"\ncall_tool get_weather(city={city!r}):")
+                print("  ->", result.content[0].text)
+
+            # 3. Gọi tool mới — schema cũng được server tự sinh
+            for city in ["Hanoi", "Danang", "Haiphong"]:
+                result = await session.call_tool("get_air_quality", {"city": city})
+                print(f"\ncall_tool get_air_quality(city={city!r}):")
                 print("  ->", result.content[0].text)
 
 

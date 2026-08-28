@@ -49,6 +49,21 @@ python auth_client.py              # terminal 2
 cd 03-production && python registry_client.py
 ```
 
+## Bài làm cá nhân — Log Analyzer MCP Server
+
+**Học viên:** Đinh Hoàng Quân<br>
+**MSHV:** 2A202602034
+
+Bài tập cá nhân nằm tại [`04-lab/log-analyzer/`](04-lab/log-analyzer/). Server tự
+động tìm kiếm và lấy lỗi gần nhất từ file log, có đầy đủ ba mức:
+
+- MCP local qua `stdio`, đăng ký và kiểm thử bằng Gemini CLI.
+- Streamable HTTP với Bearer authentication và `TokenVerifier`.
+- Versioning v1/v2, backward compatibility và resource `server://info`.
+
+Xem hướng dẫn cài đặt, input/output, kiểm thử và bằng chứng chạy tại
+[`04-lab/log-analyzer/README.md`](04-lab/log-analyzer/README.md).
+
 ---
 
 ## Định nghĩa ngắn gọn
